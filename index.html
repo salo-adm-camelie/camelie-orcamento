@@ -388,9 +388,34 @@
 
 <div class="copied-pill" id="pill">Copiado · cole em Vendas!A<span id="pillRow"></span></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js";
+  if (typeof pdfjsLib === 'undefined') {
+    document.body.innerHTML =
+      '<div style="max-width:520px;margin:60px auto;padding:24px;background:#FCF0F0;' +
+      'border-left:3px solid #B85C5C;border-radius:10px;font-family:sans-serif;color:#2C2421">' +
+      '<strong>pdf.js não carregou.</strong><br><br>' +
+      'Verifique a conexão com a internet (o script vem do CDN cdnjs.cloudflare.com) ' +
+      'e recarregue a página. Se persistir, avise.</div>';
+    throw new Error('pdf.js missing');
+  }
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+  // Captura erros globais e mostra na tela (senão ficam mudos em file://)
+  window.addEventListener('error', (ev) => {
+    const s = document.getElementById('status');
+    if (s) {
+      s.className = 'status show err';
+      s.textContent = 'Erro inesperado: ' + (ev.message || ev.error?.message || 'desconhecido');
+    }
+  });
+  window.addEventListener('unhandledrejection', (ev) => {
+    const s = document.getElementById('status');
+    if (s) {
+      s.className = 'status show err';
+      s.textContent = 'Erro: ' + (ev.reason?.message || ev.reason || 'promise rejeitada');
+    }
+  });
 
   // ========= PARSING =========
   function brToFloat(s) {
